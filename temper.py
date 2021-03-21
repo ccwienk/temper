@@ -39,16 +39,16 @@ except ImportError:
 
 
 class USBList(object):
-    '''Get a list of all of the USB devices on a system, along with their
+    """Get a list of all of the USB devices on a system, along with their
     associated hidraw or serial (tty) devices.
-    '''
+    """
 
     SYSPATH = '/sys/bus/usb/devices'
 
     def _readfile(self, path):
-        '''Read data from 'path' and return it as a string. Return the empty string
+        """Read data from 'path' and return it as a string. Return the empty string
         if the file does not exist, cannot be read, or has an error.
-        '''
+        """
         try:
             with open(path, 'r') as fp:
                 return fp.read().strip()
@@ -56,9 +56,9 @@ class USBList(object):
             return ''
 
     def _find_devices(self, dirname):
-        '''Scan a directory hierarchy for names that start with "tty" or "hidraw".
+        """Scan a directory hierarchy for names that start with "tty" or "hidraw".
         Return these names in a set.
-        '''
+        """
         devices = set()
         for entry in os.scandir(dirname):
             if entry.is_dir() and not entry.is_symlink():
@@ -70,11 +70,11 @@ class USBList(object):
         return devices
 
     def _get_usb_device(self, dirname):
-        '''Examine the files in 'dirname', looking for files with well-known
+        """Examine the files in 'dirname', looking for files with well-known
         names expected to be in the /sys hierarchy under Linux for USB devices.
         Return a dictionary of the information gathered. If no information is found
         (i.e., because the directory is not for a USB device) return None.
-        '''
+        """
         info = dict()
         vendorid = self._readfile(os.path.join(dirname, 'idVendor'))
         if vendorid == '':
@@ -91,9 +91,9 @@ class USBList(object):
         return info
 
     def get_usb_devices(self):
-        '''Scan a well-known Linux hierarchy in /sys and try to find all of the
+        """Scan a well-known Linux hierarchy in /sys and try to find all of the
         USB devices on a system. Return these as a dictionary indexed by the path.
-        '''
+        """
         info = dict()
         for entry in os.scandir(Temper.SYSPATH):
             if entry.is_dir():
@@ -106,15 +106,15 @@ class USBList(object):
 
 
 class USBRead(object):
-    '''Read temperature and/or humidity information from a specified USB device.
-    '''
+    """Read temperature and/or humidity information from a specified USB device.
+    """
 
     def __init__(self, device, verbose=False):
         self.device = device
         self.verbose = verbose
 
     def _parse_bytes(self, name, offset, divisor, bytes, info):
-        '''Data is returned from several devices in a similar format. In the first
+        """Data is returned from several devices in a similar format. In the first
         8 bytes, the internal sensors are returned in bytes 2 and 3 (temperature)
         and in bytes 4 and 5 (humidity). In the second 8 bytes, external sensor
         information is returned. If there are only external sensors, then only 8
@@ -124,7 +124,7 @@ class USBRead(object):
 
         There is no return value. Instead 'info[name]' is update directly, if a
         value is found.
-        '''
+        """
         try:
             if bytes[offset] == 0x4e and bytes[offset + 1] == 0x20:
                 return
@@ -136,7 +136,7 @@ class USBRead(object):
             return
 
     def _read_hidraw_firmware(self, fd, verbose=False):
-        ''' Get firmware identifier'''
+        """ Get firmware identifier"""
         query = struct.pack('8B', 0x01, 0x86, 0xff, 0x01, 0, 0, 0, 0)
         if verbose:
             print('Firmware query: %s' % binascii.b2a_hex(query))
@@ -168,12 +168,12 @@ class USBRead(object):
         return firmware
 
     def _read_hidraw(self, device):
-        '''Using the Linux hidraw device, send the special commands and receive the
+        """Using the Linux hidraw device, send the special commands and receive the
         raw data. Then call '_parse_bytes' based on the firmware version to provide
         temperature and humidity information.
 
         A dictionary of temperature and humidity info is returned.
-        '''
+        """
         path = os.path.join('/dev', device)
         fd = os.open(path, os.O_RDWR)
 
@@ -221,12 +221,12 @@ class USBRead(object):
         return info
 
     def _read_serial(self, device):
-        '''Using the Linux serial device, send the special commands and receive the
+        """Using the Linux serial device, send the special commands and receive the
         text data, which is parsed directly in this method.
 
         A dictionary of device info (like that returned by USBList) combined with
         temperature and humidity info is returned.
-        '''
+        """
 
         path = os.path.join('/dev', device)
         s = serial.Serial(path, 9600)
@@ -264,9 +264,9 @@ class USBRead(object):
         return info
 
     def read(self):
-        '''Read the firmware version, temperature, and humidity from the device and
+        """Read the firmware version, temperature, and humidity from the device and
         return a dictionary containing these data.
-        '''
+        """
         # Use the last device found
         if self.device.startswith('hidraw'):
             return self._read_hidraw(self.device)
@@ -286,8 +286,8 @@ class Temper(object):
         self.verbose = verbose
 
     def _is_known_id(self, vendorid, productid):
-        '''Returns True if the vendorid and product id are valid.
-        '''
+        """Returns True if the vendorid and product id are valid.
+        """
         if self.forced_vendor_id is not None and \
                 self.forced_product_id is not None:
             if self.forced_vendor_id == vendorid and \
@@ -306,9 +306,9 @@ class Temper(object):
         return False
 
     def list(self, use_json=False):
-        '''Print out a list all of the USB devices on the system. If 'use_json' is
+        """Print out a list all of the USB devices on the system. If 'use_json' is
         True, then JSON formatting will be used.
-        '''
+        """
         if use_json:
             print(json.dumps(self.usb_devices, indent=4))
             return
@@ -326,12 +326,12 @@ class Temper(object):
                 list(info['devices']) if len(info['devices']) > 0 else ''))
 
     def read(self, verbose=False):
-        '''Read all of the known devices on the system and return a list of
+        """Read all of the known devices on the system and return a list of
         dictionaries which contain the device information, firmware information,
         and environmental information obtained. If there is an error, then the
         'error' field in the dictionary will contain a string explaining the
         error.
-        '''
+        """
         results = []
         for _, info in sorted(self.usb_devices.items(),
                               key=lambda x: x[1]['busnum'] * 1000 + \
@@ -347,9 +347,9 @@ class Temper(object):
         return results
 
     def _add_temperature(self, name, info):
-        '''Helper method to add the temperature to a string in both Celsius and
+        """Helper method to add the temperature to a string in both Celsius and
         Fahrenheit. If no sensor data is available, then '- -' will be returned.
-        '''
+        """
         if name not in info:
             return '- -'
         degC = info[name]
@@ -357,18 +357,18 @@ class Temper(object):
         return '%.2fC %.2fF' % (degC, degF)
 
     def _add_humidity(self, name, info):
-        '''Helper method to add the humidity to a string. If no sensor data is
+        """Helper method to add the humidity to a string. If no sensor data is
         available, then '-' will be returned.
-        '''
+        """
 
         if name not in info:
             return '-'
         return '%d%%' % int(info[name])
 
     def print(self, results, use_json=False):
-        '''Print out a list of all of the known USB sensor devices on the system.
+        """Print out a list of all of the known USB sensor devices on the system.
         If 'use_json' is True, then JSON formatting will be used.
-        '''
+        """
 
         if use_json:
             print(json.dumps(results, indent=4))
@@ -390,9 +390,9 @@ class Temper(object):
             print(s)
 
     def main(self):
-        '''An example 'main' entry point that can be used to make temper.py a
+        """An example 'main' entry point that can be used to make temper.py a
         standalone program.
-        '''
+        """
 
         parser = argparse.ArgumentParser(description='temper')
         parser.add_argument('-l', '--list', action='store_true',
