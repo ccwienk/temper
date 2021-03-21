@@ -398,7 +398,7 @@ class Temper(object):
                             help='Provide output as JSON')
         parser.add_argument('--force', type=str,
                             help='Force the use of the hex id; ignore other ids',
-                            metavar=('VENDOR_ID:PRODUCT_ID'))
+                            metavar='VENDOR_ID:PRODUCT_ID')
         parser.add_argument('--verbose', action='store_true',
                             help='Output binary data from thermometer')
         args = parser.parse_args()
