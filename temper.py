@@ -139,7 +139,7 @@ class USBRead(object):
         """ Get firmware identifier"""
         query = struct.pack('8B', 0x01, 0x86, 0xff, 0x01, 0, 0, 0, 0)
         if verbose:
-            print('Firmware query: %s' % binascii.b2a_hex(query))
+            print(f'Firmware query: {binascii.b2a_hex(query)}')
 
         # Sometimes we don't get all of the expected information from the
         # device.  We'll retry a few times and hope for the best.
@@ -163,7 +163,7 @@ class USBRead(object):
                 break
 
         if verbose:
-            print('Firmware value: %s %s' % (binascii.b2a_hex(firmware), firmware.decode()))
+            print(f'Firmware value: {binascii.b2a_hex(firmware)} {firmware.decode()}')
 
         return firmware
 
@@ -191,7 +191,7 @@ class USBRead(object):
 
         os.close(fd)
         if self.verbose:
-            print('Data value: %s' % binascii.hexlify(_bytes))
+            print(f'Data value: {binascii.hexlify(_bytes)}')
 
         info = dict()
         info['firmware'] = str(firmware, 'latin-1').strip()
@@ -216,8 +216,7 @@ class USBRead(object):
             self._parse_bytes('external humidity', 12, 100.0, _bytes, info)
             return info
 
-        info['error'] = 'Unknown firmware %s: %s' % (info['firmware'],
-                                                     binascii.hexlify(_bytes))
+        info['error'] = f"Unknown firmware {info['firmware']}: {binascii.hexlify(_bytes)}"
         return info
 
     def _read_serial(self, device):
@@ -316,14 +315,13 @@ class Temper(object):
         for _, info in sorted(self.usb_devices.items(),
                               key=lambda x: x[1]['busnum'] * 1000 + \
                                             x[1]['devnum']):
-            print('Bus %03d Dev %03d %04x:%04x %s %s %s' % (
-                info['busnum'],
-                info['devnum'],
-                info['vendorid'],
-                info['productid'],
-                '*' if self._is_known_id(info['vendorid'], info['productid']) else ' ',
-                info.get('product', '???'),
-                list(info['devices']) if len(info['devices']) > 0 else ''))
+            print(f"Bus {info['busnum']:03d} "
+                  f"Dev {info['devnum']:03d} "
+                  f"{info['vendorid']:04x}:{info['productid']:04x} "
+                  f"{'*' if self._is_known_id(info['vendorid'], info['productid']) else ' '} "
+                  f"{info.get('product', '???')} "
+                  f"{list(info['devices']) if len(info['devices']) > 0 else ''}"
+                  )
 
     def read(self, verbose=False):
         """Read all of the known devices on the system and return a list of
@@ -354,7 +352,7 @@ class Temper(object):
             return '- -'
         degC = info[name]
         degF = degC * 1.8 + 32.0
-        return '%.2fC %.2fF' % (degC, degF)
+        return f'{degC:.2f}C {degF:.2f}F'
 
     def _add_humidity(self, name, info):
         """Helper method to add the humidity to a string. If no sensor data is
@@ -363,7 +361,7 @@ class Temper(object):
 
         if name not in info:
             return '-'
-        return '%d%%' % int(info[name])
+        return f'{int(info[name])}%'
 
     def print(self, results, use_json=False):
         """Print out a list of all of the known USB sensor devices on the system.
@@ -375,13 +373,12 @@ class Temper(object):
             return
 
         for info in results:
-            s = 'Bus %03d Dev %03d %04x:%04x %s' % (info['busnum'],
-                                                    info['devnum'],
-                                                    info['vendorid'],
-                                                    info['productid'],
-                                                    info.get('firmware'))
+            s = f"Bus {info['busnum']:03d} " \
+                f"Dev {info['devnum']:03d} " \
+                f"{info['vendorid']:04x}:{info['productid']:04x} " \
+                f"{info.get('firmware')}"
             if 'error' in info:
-                s += ' Error: %s' % info['error']
+                s += f" Error: {info['error']}"
             else:
                 s += ' ' + self._add_temperature('internal temperature', info)
                 s += ' ' + self._add_humidity('internal humidity', info)
@@ -414,13 +411,13 @@ class Temper(object):
         if args.force:
             ids = args.force.split(':')
             if len(ids) != 2:
-                print('Cannot parse hexadecimal id: %s' % args.force)
+                print(f'Cannot parse hexadecimal id: {args.force}')
                 return 1
             try:
                 vendor_id = int(ids[0], 16)
                 product_id = int(ids[1], 16)
             except:
-                print('Cannot parse hexadecimal id: %s' % args.force)
+                print(f'Cannot parse hexadecimal id: {args.force}')
                 return 1
             self.forced_vendor_id = vendor_id;
             self.forced_product_id = product_id;
