@@ -352,7 +352,7 @@ class Temper(object):
             return '- -'
         degC = info[name]
         degF = degC * 1.8 + 32.0
-        return f'{degC:.2f}C {degF:.2f}F'
+        return f'{degC:.2f}_C {degF:.2f}_F'
 
     def _add_humidity(self, name, info):
         """Helper method to add the humidity to a string. If no sensor data is
@@ -361,7 +361,7 @@ class Temper(object):
 
         if name not in info:
             return '-'
-        return f'{int(info[name])}%'
+        return f'{int(info[name])}_%'
 
     def print(self, results, use_json=False):
         """Print out a list of all of the known USB sensor devices on the system.
