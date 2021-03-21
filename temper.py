@@ -181,43 +181,43 @@ class USBRead(object):
 
         # Get temperature/humidity
         os.write(fd, struct.pack('8B', 0x01, 0x80, 0x33, 0x01, 0, 0, 0, 0))
-        bytes = b''
+        _bytes = b''
         while True:
             r, _, _ = select.select([fd], [], [], 0.1)
             if fd not in r:
                 break
             data = os.read(fd, 8)
-            bytes += data
+            _bytes += data
 
         os.close(fd)
         if self.verbose:
-            print('Data value: %s' % binascii.hexlify(bytes))
+            print('Data value: %s' % binascii.hexlify(_bytes))
 
         info = dict()
         info['firmware'] = str(firmware, 'latin-1').strip()
         info['hex_firmware'] = str(binascii.b2a_hex(firmware), 'latin-1')
-        info['hex_data'] = str(binascii.b2a_hex(bytes), 'latin-1')
+        info['hex_data'] = str(binascii.b2a_hex(_bytes), 'latin-1')
 
         if info['firmware'][:10] in ['TEMPerF1.4', 'TEMPer1F1.']:
             info['firmware'] = info['firmware'][:10]
-            self._parse_bytes('internal temperature', 2, 256.0, bytes, info)
+            self._parse_bytes('internal temperature', 2, 256.0, _bytes, info)
             return info
 
         if info['firmware'][:15] == 'TEMPerGold_V3.1':
             info['firmware'] = info['firmware'][:15]
-            self._parse_bytes('internal temperature', 2, 100.0, bytes, info)
+            self._parse_bytes('internal temperature', 2, 100.0, _bytes, info)
             return info
 
         if info['firmware'][:12] in ['TEMPerX_V3.1', 'TEMPerX_V3.3']:
             info['firmware'] = info['firmware'][:12]
-            self._parse_bytes('internal temperature', 2, 100.0, bytes, info)
-            self._parse_bytes('internal humidity', 4, 100.0, bytes, info)
-            self._parse_bytes('external temperature', 10, 100.0, bytes, info)
-            self._parse_bytes('external humidity', 12, 100.0, bytes, info)
+            self._parse_bytes('internal temperature', 2, 100.0, _bytes, info)
+            self._parse_bytes('internal humidity', 4, 100.0, _bytes, info)
+            self._parse_bytes('external temperature', 10, 100.0, _bytes, info)
+            self._parse_bytes('external humidity', 12, 100.0, _bytes, info)
             return info
 
         info['error'] = 'Unknown firmware %s: %s' % (info['firmware'],
-                                                     binascii.hexlify(bytes))
+                                                     binascii.hexlify(_bytes))
         return info
 
     def _read_serial(self, device):
