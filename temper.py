@@ -36,6 +36,17 @@ try:
 except ImportError:
   print('Cannot import "serial". Please sudo apt-get install python3-serial')
   sys.exit(1)
+# Standard, but linux-specific
+try:
+  import fcntl
+except ImportError:
+  fcntl = None
+
+
+# "Constants"
+# Equivalent of the _IO('U', 20) constant in the linux kernel.
+USBDEVFS_RESET = ord('U') << (4*2) | 20
+USE_RESET = True
 
 
 class USBList(object):
@@ -103,6 +114,7 @@ class USBList(object):
             device['port'] = entry.name
             info[path] = device
     return info
+
 
 class USBRead(object):
   '''Read temperature and/or humidity information from a specified USB device.
@@ -297,6 +309,7 @@ class USBRead(object):
       return self._read_serial(self.device)
     return {'error': 'No usable hid/tty devices available'}
 
+
 class Temper(object):
   SYSPATH = '/sys/bus/usb/devices'
 
@@ -368,6 +381,8 @@ class Temper(object):
         continue
       usbread = USBRead(info['devices'][-1], verbose)
       results.append({ **info, **usbread.read() })
+      if USE_RESET:
+          send_reset(info)
     return results
 
   def _add_temperature(self, name, info):
@@ -453,6 +468,21 @@ class Temper(object):
     results = self.read(args.verbose)
     self.print(results, args.json)
     return 0
+
+
+def send_reset(dev_info):
+    """Sends the USBDEVFS_RESET IOCTL to a USB device.
+
+    Uses the usb bus and id to reset the device under /dev/bus/usb/
+
+    dev_info - The devfs path to the USB device (under /dev/bus/usb/)
+    """
+    bus, dev = dev_info['busnum'], dev_info['devnum']
+    fd = os.open(f"/dev/bus/usb/{bus:03}/{dev:03}", os.O_WRONLY)
+    try:
+        fcntl.ioctl(fd, USBDEVFS_RESET, 0)
+    finally:
+        os.close(fd)
 
 
 def main():
