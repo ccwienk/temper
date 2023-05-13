@@ -239,6 +239,14 @@ class USBRead(object):
       #Bytes 5-6 hold the device humidity, divide by 100
       self._parse_bytes('internal humidity', 4, 100.0, bytes, info)
       return info
+    if info['firmware'][:13] == 'TEMPer1F_V3.9':
+      info['firmware'] = info['firmware'][:13]
+      self._parse_bytes('internal temperature', 2, 100.0, bytes, info)
+      self._parse_bytes('internal humidity', 4, 100.0, bytes, info)
+      self._parse_bytes('external temperature', 10, 100.0, bytes, info)
+      self._parse_bytes('external humidity', 12, 100.0, bytes, info)
+      return info      
+      
     info['error'] = 'Unknown firmware %s: %s' % (info['firmware'],
                                                  binascii.hexlify(bytes))
     return info
