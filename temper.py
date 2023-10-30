@@ -278,10 +278,11 @@ class USBRead(object):
     if m is not None:
       info['internal temperature'] = float(m.group(1))
       info['internal humidity'] = float(m.group(2))
-    m = re.search(r'Temp-Outer:([0-9.]*)', reply)
+    m = re.search(r'Temp-Outer:([0-9.]*).*?, ?([0-9.]*)', reply)
     if m is not None:
       try:
         info['external temperature'] = float(m.group(1))
+        info['external humidity'] = float(m.group(2))
       except:
         pass
     return info
