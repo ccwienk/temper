@@ -58,6 +58,7 @@ TEMPer2     | 1a86:e025 | TEMPer2_V3.7     | I,E  |     | White plastic with red
 TEMPer2     | 1a86:e025 | TEMPer2_V3.9     | I,E  |     | White plastic with red button
 TEMPer2     | 1a86:e025 | TEMPer2_M12_V1.3 | I,E  |     | White plastic with red button
 TEMPer1F    | 413d:2107 | TEMPerX_V3.3     | E    |     | White plastic
+TEMPer1F    | 1a86:e025 | TEMPer1F_V3.9    | E    |     | White plastic with pink button
 TEMPerX232  | 1a86:5523 | TEMPerX232_V2.0  | I,E  | I   | White plastic
 TEMPer1V1.1 | 0c45:7401 | TEMPer1F1.1Per1F | E    |     | Metal
 
