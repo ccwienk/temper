@@ -303,7 +303,7 @@ class USBRead(object):
 
     info = dict()
     info['firmware'] = firmware
-    m = re.search(r'Temp-Inner:([0-9.]*).*, ?([0-9.]*)', reply)
+    m = re.search(r'Temp-Inner:([0-9.]*).*?, ?([0-9.]*)', reply)
     if m is not None:
       info['internal temperature'] = float(m.group(1))
       info['internal humidity'] = float(m.group(2))
@@ -338,7 +338,7 @@ class Temper(object):
     self.verbose = verbose
 
   def _is_known_id(self, vendorid, productid):
-    '''Returns True if the vendorid and product id are valid.
+    '''Returns True if the vendorid and productid are valid.
     '''
 
     if self.forced_vendor_id is not None and \
@@ -479,8 +479,8 @@ class Temper(object):
       except:
         print('Cannot parse hexadecimal id: %s' % args.force)
         return 1
-      self.forced_vendor_id = vendor_id;
-      self.forced_product_id = product_id;
+      self.forced_vendor_id = vendor_id
+      self.forced_product_id = product_id
 
     # By default, output the temperature and humidity for all known sensors.
     results = self.read(args.verbose)

@@ -1,0 +1,6 @@
+ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="7401", GROUP="plugdev", MODE="660"
+ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="7402", GROUP="plugdev", MODE="660"
+ATTRS{idVendor}=="413d", ATTRS{idProduct}=="2107", GROUP="plugdev", MODE="660"
+ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="5523", GROUP="plugdev", MODE="660"
+ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e025", GROUP="plugdev", MODE="660"
+ATTRS{idVendor}=="3553", ATTRS{idProduct}=="a001", GROUP="plugdev", MODE="660"
